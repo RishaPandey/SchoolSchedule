@@ -94,12 +94,12 @@ public class ClassWiseTable {
 			String fName = entry.getValue();
 			String thisLine;
 			int count = 0;
-			/*
-			 * ClassLoader classloader = Thread.currentThread().getContextClassLoader();
-			 * InputStream is = classloader.getResourceAsStream(fName);
-			 */
-			FileInputStream fis = new FileInputStream(fName);
-			DataInputStream myInput = new DataInputStream(fis);
+
+			ClassLoader classloader = Thread.currentThread().getContextClassLoader();
+			InputStream is = classloader.getResourceAsStream(fName);
+
+			// FileInputStream fis = new FileInputStream(fName);
+			DataInputStream myInput = new DataInputStream(is);
 			int i = 0;
 
 			ArrayList<ArrayList<String>> lines = new ArrayList<ArrayList<String>>();

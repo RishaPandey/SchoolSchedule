@@ -1,7 +1,6 @@
 package com.nda.academy.timetable.service;
 
 import java.io.DataInputStream;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -13,7 +12,6 @@ import java.util.Map;
 
 import com.nda.academy.timetable.constants.Constants;
 import com.nda.academy.timetable.model.TeacherTimeTable;
-
 
 public class NewTimeTableTeachers {
 	Constants constants = new Constants();
@@ -32,22 +30,21 @@ public class NewTimeTableTeachers {
 	ArrayList<TeacherTimeTable> science = new ArrayList<TeacherTimeTable>();
 	ArrayList<TeacherTimeTable> kannada = new ArrayList<TeacherTimeTable>();
 
-
 	public void generateNewTimeTable() throws IOException {
-		
-		for(int indexDefaultValue = 0; indexDefaultValue <54; indexDefaultValue++ ) {
+
+		for (int indexDefaultValue = 0; indexDefaultValue < 54; indexDefaultValue++) {
 			english.add(new TeacherTimeTable(null, null, null, null));
 		}
-		for(int indexDefaultValue = 0; indexDefaultValue <54; indexDefaultValue++ ) {
+		for (int indexDefaultValue = 0; indexDefaultValue < 54; indexDefaultValue++) {
 			hindi.add(new TeacherTimeTable(null, null, null, null));
 		}
-		for(int indexDefaultValue = 0; indexDefaultValue <54; indexDefaultValue++ ) {
+		for (int indexDefaultValue = 0; indexDefaultValue < 54; indexDefaultValue++) {
 			maths.add(new TeacherTimeTable(null, null, null, null));
 		}
-		for(int indexDefaultValue = 0; indexDefaultValue <54; indexDefaultValue++ ) {
+		for (int indexDefaultValue = 0; indexDefaultValue < 54; indexDefaultValue++) {
 			science.add(new TeacherTimeTable(null, null, null, null));
 		}
-		for(int indexDefaultValue = 0; indexDefaultValue <54; indexDefaultValue++ ) {
+		for (int indexDefaultValue = 0; indexDefaultValue < 54; indexDefaultValue++) {
 			kannada.add(new TeacherTimeTable(null, null, null, null));
 		}
 
@@ -55,28 +52,26 @@ public class NewTimeTableTeachers {
 			String subject = entry.getKey();
 			String fName = entry.getValue();
 			String thisLine;
-			int count = 0;
-			/*
-			 * ClassLoader classloader = Thread.currentThread().getContextClassLoader();
-			 * InputStream is = classloader.getResourceAsStream(fName);
-			 */
-			FileInputStream fis = new FileInputStream(fName);
-			DataInputStream myInput = new DataInputStream(fis);
-			int i = 0;
+
+			ClassLoader classloader = Thread.currentThread().getContextClassLoader();
+			InputStream is = classloader.getResourceAsStream(fName);
+
+			// FileInputStream fis = new FileInputStream(fName);
+			DataInputStream myInput = new DataInputStream(is);
 
 			ArrayList<ArrayList<String>> lines = new ArrayList<ArrayList<String>>();
 			while ((thisLine = myInput.readLine()) != null) {
-				//String[] splitData = new String[7];
+				// String[] splitData = new String[7];
 				String[] splitData = thisLine.split(",");
 				ArrayList<String> data = new ArrayList<String>();
-				int mmm= splitData.length;	
-				for (String dataArray : splitData) {				
+				int mmm = splitData.length;
+				for (String dataArray : splitData) {
 					data.add(dataArray);
 				}
-				while(7-mmm>0) {
+				while (7 - mmm > 0) {
 					data.add("");
 					mmm++;
-					}
+				}
 				lines.add(data);
 			}
 
@@ -89,22 +84,22 @@ public class NewTimeTableTeachers {
 					String time = row.get(0);
 					String class_name = row.get(n);
 					String table_Name = classMapping.get(class_name);
-					String workingKey = day + "," + time;	
+					String workingKey = day + "," + time;
 					if (table_Name != null) {
 						int indexCol = weekNumMapping.get(day);
 						int indexRow = timeNumMapping.get(time);
-						int relativeIndex = indexCol+indexRow* 6;
+						int relativeIndex = indexCol + indexRow * 6;
 						TeacherTimeTable existingTableData = new TeacherTimeTable(subject, class_name, day, time);
-						String subjectChk=subject.toLowerCase(); 
-						if(subjectChk.equals("english")) {
+						String subjectChk = subject.toLowerCase();
+						if (subjectChk.equals("english")) {
 							english.set(relativeIndex, existingTableData);
-						}else if(subjectChk.equals("hindi")) {
+						} else if (subjectChk.equals("hindi")) {
 							hindi.set(relativeIndex, existingTableData);
-						}else if(subjectChk.equals("maths")) {
+						} else if (subjectChk.equals("maths")) {
 							maths.set(relativeIndex, existingTableData);
-						}else if(subjectChk.equals("science")) {
+						} else if (subjectChk.equals("science")) {
 							science.set(relativeIndex, existingTableData);
-						}else if(subjectChk.equals("kannada")) {
+						} else if (subjectChk.equals("kannada")) {
 							kannada.set(relativeIndex, existingTableData);
 						}
 						if (workingMap.containsKey(workingKey)) {
@@ -119,8 +114,7 @@ public class NewTimeTableTeachers {
 						}
 					} else {
 						if (notWorkingMap.containsKey(workingKey)) {
-							if(workingKey.startsWith("Thursday")){
-							//System.out.println(workingKey + " for " + subject);	
+							if (workingKey.startsWith("Thursday")) {
 							}
 							LinkedList<String> newEntry = new LinkedList<String>();
 							newEntry = notWorkingMap.get(workingKey);
@@ -135,134 +129,121 @@ public class NewTimeTableTeachers {
 				}
 			}
 		}
-		int count = calculateNoCoTeacherClassroomCount();
 		createNewTimeTable();
 		System.out.println("Current Ongoing classes ::: " + workingMap);
-		System.out.println("Idle Teacher no class :::" +notWorkingMap);
+		System.out.println("Idle Teacher no class :::" + notWorkingMap);
 		System.out.println("Maximum Teacher needed : " + maxExtraTeacherNeeded);
 	}
-	
+
 	public int getMaxTeacherNeeded() {
 		return maxExtraTeacherNeeded;
 	}
-	
-	public int calculateNoCoTeacherClassroomCount(){		
-		int notWorkingCount = 0;
-		int workingCount = 0;
-		for(Map.Entry<String, LinkedList<String>> entry: notWorkingMap.entrySet()) {
-			notWorkingCount += entry.getValue().size();
-		}
-		for(Map.Entry<String, LinkedList<String>> entry: workingMap.entrySet()) {
-			workingCount += entry.getValue().size();
-		}
-		return workingCount - notWorkingCount;
-	}
-	
-	public void createNewTimeTable(){
+
+	public void createNewTimeTable() {
 		Map<String, String> newTeacherTable = constants.newteacherTableFileLocFileLoc;
 		ArrayList<String> headerData = constants.headerData;
 		ArrayList<String> rowStartData = constants.rowStartData;
-		
-		for(Map.Entry<String, LinkedList<String>> entry : notWorkingMap.entrySet()) {
+
+		for (Map.Entry<String, LinkedList<String>> entry : notWorkingMap.entrySet()) {
 			LinkedList<String> classOngoing = workingMap.get(entry.getKey());
 			int num = classOngoing.size() - entry.getValue().size();
-			if(num<0) {
-				countOfExtra += 0;	
-			}else {
-			countOfExtra += num ;
-			maxExtraTeacherNeeded = Math.max(maxExtraTeacherNeeded, num);
+			if (num < 0) {
+				countOfExtra += 0;
+			} else {
+				countOfExtra += num;
+				maxExtraTeacherNeeded = Math.max(maxExtraTeacherNeeded, num);
 			}
-			for(int i =0; i<entry.getValue().size(); i++) {
+			for (int i = 0; i < entry.getValue().size(); i++) {
 				String className;
 				String subject = entry.getValue().get(i);
-				if(i <=classOngoing.size()-1) {
-				 className = classOngoing.get(i);	
-				}else {
+				if (i <= classOngoing.size() - 1) {
+					className = classOngoing.get(i);
+				} else {
 					className = " ";
 				}
-				String[] arg= entry.getKey().split(",");
+				String[] arg = entry.getKey().split(",");
 				String day = arg[0];
 				String time = arg[1];
-				TeacherTimeTable newTableData = new TeacherTimeTable(subject, className+" Co", day, time);
+				TeacherTimeTable newTableData = new TeacherTimeTable(subject, className + " Co", day, time);
 				int indexCol = weekNumMapping.get(day);
 				int indexRow = timeNumMapping.get(time);
-				int relativeIndex = indexCol+indexRow* 6;
-				String subjectChk=subject.toLowerCase(); 
-				if(subjectChk.equals("english")) {
+				int relativeIndex = indexCol + indexRow * 6;
+				String subjectChk = subject.toLowerCase();
+				if (subjectChk.equals("english")) {
 					english.set(relativeIndex, newTableData);
-				}else if(subjectChk.equals("hindi")) {
+				} else if (subjectChk.equals("hindi")) {
 					hindi.set(relativeIndex, newTableData);
-				}else if(subjectChk.equals("maths")) {
+				} else if (subjectChk.equals("maths")) {
 					maths.set(relativeIndex, newTableData);
-				}else if(subjectChk.equals("science")) {
+				} else if (subjectChk.equals("science")) {
 					science.set(relativeIndex, newTableData);
-				}else if(subjectChk.equals("kannada")) {
+				} else if (subjectChk.equals("kannada")) {
 					kannada.set(relativeIndex, newTableData);
 				}
 			}
 		}
 
-	   final String lineSeparator = System.getProperty("line.separator");
-       for(Map.Entry<String, String> subjectTeacher : newTeacherTable.entrySet()) {
-		String path = subjectTeacher.getValue();
-		String key = subjectTeacher.getKey().toLowerCase();
-		ArrayList<TeacherTimeTable> addingTeacherData = new ArrayList<TeacherTimeTable>();
-		HashMap<String, ArrayList<String>> timeMapping = new HashMap<String, ArrayList<String>>();
-		timeMapping.put("--", headerData);
-		
-		if(key.equals("english")) {
-			addingTeacherData = english;
-		}else if(key.equals("hindi")) {
-			addingTeacherData = hindi;
-		}else if(key.equals("maths")) {
-			addingTeacherData = maths;
-		}else if(key.equals("science")) {
-			addingTeacherData = science;
-		}else if(key.equals("kannada")) {
-			addingTeacherData = kannada;
-		}
-		// setup the header line
-		StringBuilder sb = new StringBuilder();
-		sb.append(lineSeparator);
+		final String lineSeparator = System.getProperty("line.separator");
+		for (Map.Entry<String, String> subjectTeacher : newTeacherTable.entrySet()) {
+			String path = subjectTeacher.getValue();
+			String key = subjectTeacher.getKey().toLowerCase();
+			ArrayList<TeacherTimeTable> addingTeacherData = new ArrayList<TeacherTimeTable>();
+			HashMap<String, ArrayList<String>> timeMapping = new HashMap<String, ArrayList<String>>();
+			timeMapping.put("--", headerData);
 
-		//  append data in a loop
-		for (int i = 0; i < addingTeacherData.size(); i++) {
-			TeacherTimeTable c= addingTeacherData.get(i);
-			ArrayList<String> data = new ArrayList<String>();
-			String time = c.getTime();
-			if(timeMapping.containsKey(time)){
-				data = timeMapping.get(time);
-				data.add(c.getClassName());
-				timeMapping.put(time, data);
-			}else {
-				data.add(time);
-				data.add(c.getClassName());
-				timeMapping.put(time, data);
+			if (key.equals("english")) {
+				addingTeacherData = english;
+			} else if (key.equals("hindi")) {
+				addingTeacherData = hindi;
+			} else if (key.equals("maths")) {
+				addingTeacherData = maths;
+			} else if (key.equals("science")) {
+				addingTeacherData = science;
+			} else if (key.equals("kannada")) {
+				addingTeacherData = kannada;
 			}
-		}
-		ArrayList<ArrayList<String>> list = new ArrayList<ArrayList<String>>();
-		for(int coco = 0; coco<rowStartData.size(); coco++) {
-			list.add(timeMapping.get(rowStartData.get(coco)));	
-		}
-			for(ArrayList<String> data : list) {
-			for(int k = 0; k<data.size(); k++) {
-				sb.append(data.get(k));
-				if(k != data.size()-1) {
-				sb.append(",");	
+			// setup the header line
+			StringBuilder sb = new StringBuilder();
+			sb.append(lineSeparator);
+
+			// append data in a loop
+			for (int i = 0; i < addingTeacherData.size(); i++) {
+				TeacherTimeTable c = addingTeacherData.get(i);
+				ArrayList<String> data = new ArrayList<String>();
+				String time = c.getTime();
+				if (timeMapping.containsKey(time)) {
+					data = timeMapping.get(time);
+					data.add(c.getClassName());
+					timeMapping.put(time, data);
+				} else {
+					data.add(time);
+					data.add(c.getClassName());
+					timeMapping.put(time, data);
 				}
 			}
-			sb.append(lineSeparator);
+			ArrayList<ArrayList<String>> list = new ArrayList<ArrayList<String>>();
+			for (int coco = 0; coco < rowStartData.size(); coco++) {
+				list.add(timeMapping.get(rowStartData.get(coco)));
 			}
-			
-		try {
-			Files.write(Paths.get(path), sb.toString().getBytes());
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			for (ArrayList<String> data : list) {
+				for (int k = 0; k < data.size(); k++) {
+					sb.append(data.get(k));
+					if (k != data.size() - 1) {
+						sb.append(",");
+					}
+				}
+				sb.append(lineSeparator);
+			}
+
+			try {
+				Files.write(Paths.get(path), sb.toString().getBytes());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			// now write to file
+
 		}
-		// now write to file
-		
-       }
 	}
 
 }
