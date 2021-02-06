@@ -261,7 +261,7 @@ class DialogCreatingMenuItem extends JMenuItem implements ActionListener {
 				}
 				count++;
 			}
-			if (b) {
+			while(model.getRowCount()<=9 ) {
 				model.addRow(new Object[0]);
 			}
 			br.close();
